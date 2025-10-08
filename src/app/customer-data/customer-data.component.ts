@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DataEntryComponent } from './data-entry/data-entry.component';
+import { DataEntryComponent } from '../data-entry/data-entry.component';
 import { Customer } from '../models/customer.model';
 import { CommonModule } from '@angular/common';
 
