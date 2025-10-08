@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+}
+
+.label-text {
+  font-weight: 500;
+}
+
+.entry input {
+  width: 100%;
+}
