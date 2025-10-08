@@ -1,3 +1,3 @@
 <app-header></app-header>
-<app-customer-data></app-customer-data>
+<app-customer-data [customer]="customerDraft" (save)="onSave($event)"></app-customer-data>
 <router-outlet />
