@@ -1,5 +1,5 @@
 <h1>Kunden Stammdaten</h1>
 <div class="customer-data-entry-container">
-	<app-data-entry *ngFor="let field of fields" [label]="capitalize(field)" [model]="customer"
+	<app-data-entry *ngFor="let field of fields" [label]="labelFor(field)" [model]="customer"
 		[field]="field"></app-data-entry>
 </div>

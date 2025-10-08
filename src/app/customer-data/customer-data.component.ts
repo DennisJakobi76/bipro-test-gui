@@ -14,11 +14,20 @@ export class CustomerDataComponent {
   customer: Customer = new Customer('', '', '', '', '', '');
   fields: string[] = [];
 
+  readonly LABELS: Record<string, string> = {
+    firstName: 'Vorname',
+    lastName: 'Nachname',
+    street: 'Straße',
+    houseNumber: 'Hausnummer',
+    postalCode: 'PLZ',
+    city: 'Ort',
+  };
+
   ngOnInit() {
     this.fields = Object.keys(this.customer);
   }
 
-  capitalize(word: string): string {
-    return word.charAt(0).toUpperCase() + word.slice(1);
+  labelFor(field: string): string {
+    return this.LABELS[field] ?? field;
   }
 }
