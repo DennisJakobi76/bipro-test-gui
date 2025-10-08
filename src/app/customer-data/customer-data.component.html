@@ -1,5 +1,6 @@
 <h1>Kunden Stammdaten</h1>
 <div class="customer-data-entry-container">
-	<app-data-entry *ngFor="let field of fields" [label]="labelFor(field)" [model]="customer"
-		[field]="field"></app-data-entry>
+	<app-data-entry *ngFor="let field of fields" [label]="labelFor(field)" [model]="customer" [field]="field"
+		(valueChange)="onAnyFieldChange()"></app-data-entry>
 </div>
+<button type="button" (click)="onSaveClick()" [disabled]="!isComplete">Speichern</button>
