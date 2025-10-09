@@ -2,6 +2,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DataEntryComponent } from '../data-entry/data-entry.component';
 import { CommonModule } from '@angular/common';
 import { CurrentPolicy } from '../models/current-policy.model';
+import { Customer } from '../models/customer.model';
+import { BiproCancellationService } from '../services/bipro-cancellation.service';
 
 @Component({
   selector: 'app-current-policies',
@@ -11,10 +13,13 @@ import { CurrentPolicy } from '../models/current-policy.model';
 })
 export class CurrentPoliciesComponent implements OnInit {
   @Input() policies: CurrentPolicy[] = [];
+  @Input() customer?: Customer;
   @Output() policyChange = new EventEmitter<CurrentPolicy>();
   @Output() save = new EventEmitter<CurrentPolicy>();
 
   fields: string[] = [];
+
+  constructor(private biproCancellationService: BiproCancellationService) {}
 
   get currentPolicy(): CurrentPolicy {
     return this.policies[0];
@@ -66,26 +71,30 @@ export class CurrentPoliciesComponent implements OnInit {
     console.log('Saved policy:', this.policies[0]);
   }
 
-  createCancellationPDF() {
-    // Implementierung der PDF-Erstellung
-  }
+  async onStartBiPROClick() {
+    if (!this.customer) {
+      console.error('Customer data is required for BiPRO cancellation');
+      alert('Bitte speichern Sie zuerst die Kundendaten.');
+      return;
+    }
 
-  mapCancellationToBiPROTemplate() {
-    // Implementierung der Mapping-Funktionalität
-  }
+    if (!this.isComplete) {
+      console.error('Policy data is incomplete');
+      alert('Bitte vervollständigen Sie alle Policen-Felder.');
+      return;
+    }
 
-  sendCancellationRequest() {
-    // Implementierung der Sende-Funktionalität
-  }
-
-  onStartBiPROClick() {
-    // Erstelle Kündigung per REST an Java-Microservice
-    this.createCancellationPDF();
-
-    // Mappe Kündigungsdaten auf BiPRO-Template des Vorversicherers als XML per REST an Java-Microservice
-    this.mapCancellationToBiPROTemplate();
-
-    // Sende Kündigungsantrag an Java-Microservice
-    this.sendCancellationRequest();
+    try {
+      await this.biproCancellationService.startBiproCancellation(
+        this.customer,
+        this.currentPolicy
+      );
+      console.log('BiPRO cancellation process initiated successfully');
+    } catch (error) {
+      console.error('Failed to start BiPRO cancellation:', error);
+      alert(
+        'Fehler beim Starten des Kündigungsprozesses. Bitte versuchen Sie es erneut.'
+      );
+    }
   }
 }

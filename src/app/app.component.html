@@ -1,4 +1,4 @@
 <app-header></app-header>
 <app-customer-data [customer]="customerDraft" (save)="onSave($event)"></app-customer-data>
-<app-current-policies></app-current-policies>
+<app-current-policies [customer]="finalCustomer"></app-current-policies>
 <router-outlet />
