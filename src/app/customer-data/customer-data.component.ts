@@ -17,8 +17,6 @@ export class CustomerDataComponent implements OnInit {
 
   fields: string[] = [];
 
-  private wasComplete = false;
-
   readonly LABELS: Record<string, string> = {
     firstName: 'Vorname',
     lastName: 'Nachname',

@@ -1,1 +1,5 @@
 <h1>Aktuelle Policen</h1>
+
+<div class="current-policies-container">
+	<app-data-entry *ngFor="let field of fields" [label]="labelFor(field)" [model]="''" [field]="field"></app-data-entry>
+</div>
