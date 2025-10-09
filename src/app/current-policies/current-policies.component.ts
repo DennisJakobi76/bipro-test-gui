@@ -61,6 +61,31 @@ export class CurrentPoliciesComponent implements OnInit {
       this.currentPolicy.endDate?.trim(),
       this.currentPolicy.insuranceCompany?.trim()
     );
-    console.log('Saved policy:', p);
+    this.policies[0] = p;
+    this.save.emit(p);
+    console.log('Saved policy:', this.policies[0]);
+  }
+
+  createCancellationPDF() {
+    // Implementierung der PDF-Erstellung
+  }
+
+  mapCancellationToBiPROTemplate() {
+    // Implementierung der Mapping-Funktionalität
+  }
+
+  sendCancellationRequest() {
+    // Implementierung der Sende-Funktionalität
+  }
+
+  onStartBiPROClick() {
+    // Erstelle Kündigung per REST an Java-Microservice
+    this.createCancellationPDF();
+
+    // Mappe Kündigungsdaten auf BiPRO-Template des Vorversicherers als XML per REST an Java-Microservice
+    this.mapCancellationToBiPROTemplate();
+
+    // Sende Kündigungsantrag an Java-Microservice
+    this.sendCancellationRequest();
   }
 }
