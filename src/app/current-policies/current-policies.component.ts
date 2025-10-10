@@ -85,7 +85,7 @@ export class CurrentPoliciesComponent implements OnInit {
     }
 
     try {
-      await this.biproCancellationService.startBiproCancellation(
+      await this.biproCancellationService.startBipro(
         this.customer,
         this.currentPolicy
       );

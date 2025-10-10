@@ -18,11 +18,11 @@ export class BiproCancellationService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Starts the complete BiPRO cancellation process
+   * Starts the complete BiPRO process
    * @param customer Customer data
    * @param currentPolicy Current policy data
    */
-  async startBiproCancellation(
+  async startBipro(
     customer: Customer,
     currentPolicy: CurrentPolicy
   ): Promise<void> {
@@ -37,8 +37,8 @@ export class BiproCancellationService {
         pdfBlob
       );
 
-      // 3) (Optional) Senden an Vorversicherer
-      // await this.sendCancellationRequest(customer, currentPolicy);
+      // 3) Bearbeitung durch Vorversicherer mocken
+      await this.startCancellationProcessingMock(this.generatedXml);
 
       // console.log('BiPRO cancellation process completed successfully');
     } catch (error) {
@@ -264,20 +264,10 @@ export class BiproCancellationService {
   }
 
   /**
-   * Sends cancellation request to insurance company
+   * Starts the cancellation processing process
    */
-  private async sendCancellationRequest(
-    customer: Customer,
-    currentPolicy: CurrentPolicy
-  ): Promise<void> {
-    console.log('Sending cancellation request for:', {
-      customer: `${customer.firstName} ${customer.lastName}`,
-      policy: currentPolicy.policyNumber,
-      insuranceCompany: currentPolicy.insuranceCompany,
-    });
-
-    // TODO: Implementierung der Sende-Funktionalität per REST-Call
-    // Beispiel:
-    // await firstValueFrom(this.http.post('/api/cancellation/send', { customer, currentPolicy }));
-  }
+  private async startCancellationProcessingMock(
+    generatedXml: string | null
+  ): Promise<void> {}
+  //TODO: implementieren
 }
