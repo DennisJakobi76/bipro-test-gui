@@ -265,9 +265,46 @@ export class BiproCancellationService {
 
   /**
    * Starts the cancellation processing process
+   * @returns Promise<string> The response from the mock service
    */
   private async startCancellationProcessingMock(
     generatedXml: string | null
-  ): Promise<void> {}
-  //TODO: implementieren
+  ): Promise<string> {
+    if (!generatedXml) {
+      console.error('Kein XML verfügbar für die Bearbeitung.');
+      throw new Error('Kein XML verfügbar für die Bearbeitung.');
+    }
+
+    console.log('Sende XML an Cancellation Processing Mock Service:', {
+      xmlLength: generatedXml.length,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post(
+          'http://localhost:8082/api/cancellation-confirm',
+          generatedXml,
+          {
+            headers: {
+              'Content-Type': 'application/xml',
+            },
+            responseType: 'text',
+          }
+        )
+      );
+
+      console.log(
+        'Response from Cancellation Processing Mock Service:',
+        response
+      );
+      return response;
+    } catch (error) {
+      console.error(
+        'Fehler beim Senden des XML an den Processing Mock Service:',
+        error
+      );
+      throw error;
+    }
+  }
 }
