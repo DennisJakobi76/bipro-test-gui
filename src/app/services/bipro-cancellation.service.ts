@@ -18,11 +18,11 @@ export class BiproCancellationService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Starts the complete BiPRO cancellation process
+   * Starts the complete BiPRO process
    * @param customer Customer data
    * @param currentPolicy Current policy data
    */
-  async startBiproCancellation(
+  async startBipro(
     customer: Customer,
     currentPolicy: CurrentPolicy
   ): Promise<void> {
@@ -37,8 +37,8 @@ export class BiproCancellationService {
         pdfBlob
       );
 
-      // 3) (Optional) Senden an Vorversicherer
-      // await this.sendCancellationRequest(customer, currentPolicy);
+      // 3) Bearbeitung durch Vorversicherer mocken
+      await this.startCancellationProcessingMock(this.generatedXml);
 
       // console.log('BiPRO cancellation process completed successfully');
     } catch (error) {
@@ -264,20 +264,47 @@ export class BiproCancellationService {
   }
 
   /**
-   * Sends cancellation request to insurance company
+   * Starts the cancellation processing process
+   * @returns Promise<string> The response from the mock service
    */
-  private async sendCancellationRequest(
-    customer: Customer,
-    currentPolicy: CurrentPolicy
-  ): Promise<void> {
-    console.log('Sending cancellation request for:', {
-      customer: `${customer.firstName} ${customer.lastName}`,
-      policy: currentPolicy.policyNumber,
-      insuranceCompany: currentPolicy.insuranceCompany,
+  private async startCancellationProcessingMock(
+    generatedXml: string | null
+  ): Promise<string> {
+    if (!generatedXml) {
+      console.error('Kein XML verfügbar für die Bearbeitung.');
+      throw new Error('Kein XML verfügbar für die Bearbeitung.');
+    }
+
+    console.log('Sende XML an Cancellation Processing Mock Service:', {
+      xmlLength: generatedXml.length,
+      timestamp: new Date().toISOString(),
     });
 
-    // TODO: Implementierung der Sende-Funktionalität per REST-Call
-    // Beispiel:
-    // await firstValueFrom(this.http.post('/api/cancellation/send', { customer, currentPolicy }));
+    try {
+      const response = await firstValueFrom(
+        this.http.post(
+          'http://localhost:8082/api/cancellation-confirm',
+          generatedXml,
+          {
+            headers: {
+              'Content-Type': 'application/xml',
+            },
+            responseType: 'text',
+          }
+        )
+      );
+
+      console.log(
+        'Response from Cancellation Processing Mock Service:',
+        response
+      );
+      return response;
+    } catch (error) {
+      console.error(
+        'Fehler beim Senden des XML an den Processing Mock Service:',
+        error
+      );
+      throw error;
+    }
   }
 }
