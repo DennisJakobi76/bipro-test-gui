@@ -11,6 +11,40 @@ import { BiproCancellationService } from '../services/bipro-cancellation.service
   templateUrl: './current-policies.component.html',
   styleUrl: './current-policies.component.scss',
 })
+/**
+ * Component for displaying and managing the current insurance policies of a customer.
+ *
+ * @remarks
+ * - Allows editing of a single policy at a time.
+ * - Emits events when a policy is changed or saved.
+ * - Integrates with a BiPRO cancellation service to initiate policy cancellation processes.
+ *
+ * @example
+ * ```html
+ * <app-current-policies
+ *   [policies]="policies"
+ *   [customer]="customer"
+ *   (policyChange)="onPolicyChange($event)"
+ *   (save)="onSave($event)">
+ * </app-current-policies>
+ * ```
+ *
+ * @inputs
+ * - `policies`: The list of current policies to display and edit.
+ * - `customer`: The customer associated with the policies.
+ *
+ * @outputs
+ * - `policyChange`: Emits when any field of the current policy changes.
+ * - `save`: Emits when the current policy is saved.
+ *
+ * @dependencies
+ * - `BiproCancellationService`: Service used to initiate BiPRO cancellation processes.
+ *
+ * @methods
+ * - `onAnyFieldChange()`: Emits the `policyChange` event when a policy field changes.
+ * - `onSaveClick()`: Validates and saves the current policy, emitting the `save` event.
+ * - `onStartBiPROClick()`: Initiates the BiPRO cancellation process for the current policy and customer.
+ */
 export class CurrentPoliciesComponent implements OnInit {
   @Input() policies: CurrentPolicy[] = [];
   @Input() customer?: Customer;
