@@ -68,8 +68,6 @@ export class BiproCancellationService {
 
       // 3) Mock Processing
       await this.startCancellationProcessingMock(this.generatedXml);
-
-      console.log('BiPRO cancellation process completed successfully');
     } catch (error) {
       console.error('Error during BiPRO cancellation process:', error);
       throw error;
