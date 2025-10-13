@@ -123,7 +123,6 @@ export class CurrentPoliciesComponent implements OnInit {
         this.customer,
         this.currentPolicy
       );
-      console.log('BiPRO cancellation process initiated successfully');
     } catch (error) {
       console.error('Failed to start BiPRO cancellation:', error);
       alert(
