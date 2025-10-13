@@ -7,11 +7,40 @@ import { firstValueFrom } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
+/**
+ * Service for handling the complete BiPRO cancellation process, including PDF generation,
+ * BiPRO XML mapping, and mock processing of cancellation requests.
+ *
+ * This service provides methods to:
+ * - Generate a cancellation PDF based on customer and policy data.
+ * - Map the cancellation data and PDF to a BiPRO-compliant XML format.
+ * - Mock the processing of the cancellation by sending the XML to a mock backend.
+ * - Manage and retrieve generated artifacts (PDF and XML), including download and preview functionality.
+ * - Clear generated artifacts from memory.
+ *
+ * Typical usage:
+ * 1. Call `startBipro()` to execute the full cancellation workflow.
+ * 2. Use getter methods to access the generated PDF or XML, or to check their existence.
+ * 3. Use download/preview methods to interact with the generated PDF.
+ * 4. Use clear methods to remove artifacts from memory.
+ *
+ * @example
+ * const service = new BiproCancellationService(httpClient);
+ * await service.startBipro(customer, policy);
+ * if (service.hasPdfGenerated()) {
+ *   service.downloadGeneratedPdf();
+ * }
+ *
+ * @remarks
+ * - Relies on backend endpoints for PDF generation, XML mapping, and mock processing.
+ * - Handles errors and provides user feedback via alerts and console logs.
+ * - Designed for use in Angular applications with dependency injection of HttpClient.
+ */
 export class BiproCancellationService {
   private generatedPdfBlob: Blob | null = null;
   private pdfGenerationTimestamp: number | null = null;
 
-  // NEU: XML-Response vorhalten
+  // Create storage for generated XML
   private generatedXml: string | null = null;
   private xmlGenerationTimestamp: number | null = null;
 
@@ -27,57 +56,47 @@ export class BiproCancellationService {
     currentPolicy: CurrentPolicy
   ): Promise<void> {
     try {
-      // 1) Kündigungs-PDF erstellen
+      // 1) PDF-Creation
       const pdfBlob = await this.createCancellationPDF(customer, currentPolicy);
 
-      // 2) BiPRO-Mapping (PDF + Daten -> XML) an 8081 senden und XML speichern
+      // 2) Mapping to BiPRO Template
       await this.mapCancellationToBiPROTemplate(
         customer,
         currentPolicy,
         pdfBlob
       );
 
-      // 3) Bearbeitung durch Vorversicherer mocken
+      // 3) Mock Processing
       await this.startCancellationProcessingMock(this.generatedXml);
 
-      // console.log('BiPRO cancellation process completed successfully');
+      console.log('BiPRO cancellation process completed successfully');
     } catch (error) {
       console.error('Error during BiPRO cancellation process:', error);
       throw error;
     }
   }
 
-  /** Returns the last generated PDF blob */
+  // Returns the last generated PDF blob
   getGeneratedPdf(): Blob | null {
     return this.generatedPdfBlob;
   }
 
-  /** Returns the timestamp when the PDF was generated */
+  // Returns the timestamp when the PDF was generated
   getPdfGenerationTimestamp(): number | null {
     return this.pdfGenerationTimestamp;
   }
 
-  /** Checks if a PDF has been generated */
+  // Checks if a PDF has been generated
   hasPdfGenerated(): boolean {
     return this.generatedPdfBlob !== null;
   }
 
-  /** NEU: Gibt das letzte erzeugte XML zurück */
+  // Returns the last generated XML
   getGeneratedXml(): string | null {
     return this.generatedXml;
   }
 
-  /** NEU: Gibt den Timestamp der XML-Erzeugung zurück */
-  getXmlGenerationTimestamp(): number | null {
-    return this.xmlGenerationTimestamp;
-  }
-
-  /** NEU: Prüft, ob XML vorliegt */
-  hasXmlGenerated(): boolean {
-    return this.generatedXml !== null;
-  }
-
-  /** Downloads the generated PDF */
+  // Downloads the generated PDF
   downloadGeneratedPdf(filename: string = 'kuendigung.pdf'): void {
     if (!this.generatedPdfBlob) {
       throw new Error(
@@ -95,7 +114,7 @@ export class BiproCancellationService {
     URL.revokeObjectURL(url);
   }
 
-  /** Opens the generated PDF in a new window */
+  // Opens the generated PDF in a new window
   previewGeneratedPdf(): void {
     if (!this.generatedPdfBlob) {
       throw new Error(
@@ -116,27 +135,25 @@ export class BiproCancellationService {
     }, 60000);
   }
 
-  /** Clears the stored PDF and XML from memory */
+  // Clears the stored PDF and XML from memory
   clearGeneratedPdf(): void {
     this.generatedPdfBlob = null;
     this.pdfGenerationTimestamp = null;
   }
 
-  /** NEU: Nur XML löschen */
+  // Clears the stored XML from memory
   clearGeneratedXml(): void {
     this.generatedXml = null;
     this.xmlGenerationTimestamp = null;
   }
 
-  /** NEU: Alles leeren */
+  // Clears all stored artifacts (PDF and XML)
   clearAllArtifacts(): void {
     this.clearGeneratedPdf();
     this.clearGeneratedXml();
   }
 
-  /**
-   * Generates a new PDF without showing the preview
-   */
+  //Generates a new PDF without showing the preview
   async generatePdfOnly(
     customer: Customer,
     currentPolicy: CurrentPolicy
@@ -144,9 +161,7 @@ export class BiproCancellationService {
     return await this.createCancellationPDF(customer, currentPolicy, false);
   }
 
-  /**
-   * Creates cancellation PDF with customer and policy data
-   */
+  // Creates cancellation PDF with customer and policy data
   private async createCancellationPDF(
     customer: Customer,
     currentPolicy: CurrentPolicy,
@@ -225,7 +240,7 @@ export class BiproCancellationService {
       // multipart/form-data aufbauen
       const formData = new FormData();
 
-      // Datei anhängen – Dateiname optional, hilft aber serverseitig
+      // Add PDF file to form data
       const pdfFileName =
         (currentPolicy.policyNumber
           ? `cancellation_${currentPolicy.policyNumber}`
@@ -242,14 +257,14 @@ export class BiproCancellationService {
         new Blob([JSON.stringify(currentPolicy)], { type: 'application/json' })
       );
 
-      // WICHTIG: responseType 'text', weil der Server XML liefert (Content-Type text/xml oder application/xml)
+      // Request an Mapping-Endpoint senden
       const xmlResponse = await firstValueFrom(
         this.http.post('http://localhost:8081/api/pdf-xml', formData, {
           responseType: 'text',
         })
       );
 
-      // XML für spätere Verwendung speichern
+      // Save XML in Service
       this.generatedXml = xmlResponse;
       this.xmlGenerationTimestamp = Date.now();
 
